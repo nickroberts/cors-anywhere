@@ -7,12 +7,13 @@
 // The difference in heap space is finally sent back to the parent process.
 // ...
 // The parent process should then kill this child.
+const chalk = require('chalk');
 const winston = require('winston');
 winston.level = process.env.LOG_LEVEL || 'info';
 
 process.on('uncaughtException', function(e) {
-  winston.error('Uncaught exception in child process: ' + e);
-  winston.error(e.stack);
+  winston.error(chalk.bgRed('Uncaught exception in child process: ' + e));
+  winston.error(chalk.bgRed(e.stack));
   process.exit(-1);
 });
 

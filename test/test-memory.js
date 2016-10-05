@@ -5,6 +5,7 @@ const http = require('http');
 const path = require('path');
 const url = require('url');
 const fork = require('child_process').fork;
+const chalk = require('chalk');
 const winston = require('winston');
 winston.level = process.env.LOG_LEVEL || 'info';
 
@@ -67,8 +68,8 @@ describe('memory usage', function() {
     (function requestAgain() {
       if (remaining-- === 0) {
         cors_anywhere_child.once('message', function(memory_usage_delta) {
-          winston.info('Memory usage delta: ' + memory_usage_delta +
-              ' (' + n + ' requests of ' + requestSize + ' kb each)');
+          winston.info(chalk.green('Memory usage delta: ') + chalk.white(memory_usage_delta +
+              ' (' + n + ' requests of ' + requestSize + ' kb each)'));
           if (memory_usage_delta > memMax * 1e3) {
             // Note: Even if this error is reached, always profile (e.g. using
             // node-inspector) whether it is a true leak, and not e.g. noise

@@ -913,7 +913,6 @@ describe('helpFile', function() {
   it('GET / with custom text helpFile', function(done) {
     let customHelpTextPath = path.join(__dirname, './customHelp.txt');
     let customHelpText = fs.readFileSync(customHelpTextPath, {encoding: 'utf8'});
-
     cors_anywhere = createServer({
       helpFile: customHelpTextPath
     });

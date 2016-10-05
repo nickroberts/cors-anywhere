@@ -2,6 +2,7 @@
 const host = process.env.PORT ? '0.0.0.0' : '127.0.0.1';
 const port = process.env.PORT || 8080;
 const winston = require('winston');
+const chalk = require('chalk');
 winston.level = process.env.LOG_LEVEL || 'info';
 
 // Grab the blacklist from the command-line so that we can update the blacklist without deploying
@@ -41,5 +42,5 @@ cors_proxy.createServer({
     xfwd: false
   }
 }).listen(port, host, function() {
-  winston.info('Running CORS Anywhere on ' + host + ':' + port);
+  winston.info(chalk.green('Running CORS Anywhere on ') + chalk.white(host + ':' + port));
 });
