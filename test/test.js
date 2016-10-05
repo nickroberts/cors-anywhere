@@ -1,20 +1,20 @@
 /* eslint-env mocha */
 require('./setup');
 
-var createServer = require('../').createServer;
-var request = require('supertest');
-var path = require('path');
-var http = require('http');
-var fs = require('fs');
-var assert = require('assert');
+const createServer = require('../').createServer;
+const request = require('supertest');
+const path = require('path');
+const http = require('http');
+const fs = require('fs');
+const assert = require('assert');
 
-var helpTextPath = path.join(__dirname, '../lib/help.txt');
-var helpText = fs.readFileSync(helpTextPath, {encoding: 'utf8'});
+const helpTextPath = path.join(__dirname, '../lib/help.txt');
+const helpText = fs.readFileSync(helpTextPath, {encoding: 'utf8'});
 
 request.Test.prototype.expectJSON = function(json, done) {
   this.expect(function(res) {
     // Assume that the response can be parsed as JSON (otherwise it throws).
-    var actual = JSON.parse(res.text);
+    let actual = JSON.parse(res.text);
     assert.deepEqual(actual, json);
   });
   return done ? this.end(done) : this;
@@ -29,8 +29,8 @@ request.Test.prototype.expectNoHeader = function(header, done) {
   return done ? this.end(done) : this;
 };
 
-var cors_anywhere;
-var cors_anywhere_port;
+let cors_anywhere;
+let cors_anywhere_port;
 function stopServer(done) {
   cors_anywhere.close(function() {
     done();
@@ -270,7 +270,7 @@ describe('Basic functionality', function() {
       .expectJSON({
         host: 'example.com',
         'x-forwarded-port': String(cors_anywhere_port),
-        'x-forwarded-proto': 'http',
+        'x-forwarded-proto': 'http'
       }, done);
   });
 
@@ -282,7 +282,7 @@ describe('Basic functionality', function() {
       .expectJSON({
         host: 'example.com:1337',
         'x-forwarded-port': String(cors_anywhere_port),
-        'x-forwarded-proto': 'http',
+        'x-forwarded-proto': 'http'
       }, done);
   });
 
@@ -294,7 +294,7 @@ describe('Basic functionality', function() {
       .expectJSON({
         host: 'example.com',
         'x-forwarded-port': String(cors_anywhere_port),
-        'x-forwarded-proto': 'http',
+        'x-forwarded-proto': 'http'
       }, done);
   });
 
@@ -315,12 +315,12 @@ describe('Proxy errors', function() {
   });
   after(stopServer);
 
-  var bad_http_server;
-  var bad_http_server_url;
+  let bad_http_server;
+  let bad_http_server_url;
   before(function() {
     bad_http_server = http.createServer(function(req, res) {
       res.writeHead(418, {
-        'Content-Length': 'Not a digit',
+        'Content-Length': 'Not a digit'
       });
       res.end('This response has an invalid Content-Length header.');
     });
@@ -332,8 +332,8 @@ describe('Proxy errors', function() {
     });
   });
 
-  var bad_tcp_server;
-  var bad_tcp_server_url;
+  let bad_tcp_server;
+  let bad_tcp_server_url;
   before(function() {
     bad_tcp_server = require('net').createServer(function(socket) {
       socket.setEncoding('utf-8');
@@ -380,13 +380,13 @@ describe('Proxy errors', function() {
 });
 
 describe('server on https', function() {
-  var NODE_TLS_REJECT_UNAUTHORIZED;
+  let NODE_TLS_REJECT_UNAUTHORIZED;
   before(function() {
     cors_anywhere = createServer({
       httpsOptions: {
         key: fs.readFileSync(path.join(__dirname, 'key.pem')),
-        cert: fs.readFileSync(path.join(__dirname, 'cert.pem')),
-      },
+        cert: fs.readFileSync(path.join(__dirname, 'cert.pem'))
+      }
     });
     cors_anywhere_port = cors_anywhere.listen(0).address().port;
     // Disable certificate validation in case the certificate expires.
@@ -410,7 +410,7 @@ describe('server on https', function() {
       .expectJSON({
         host: 'example.com',
         'x-forwarded-port': String(cors_anywhere_port),
-        'x-forwarded-proto': 'https',
+        'x-forwarded-proto': 'https'
       }, done);
   });
 
@@ -422,7 +422,7 @@ describe('server on https', function() {
       .expectJSON({
         host: 'example.com',
         'x-forwarded-port': String(cors_anywhere_port),
-        'x-forwarded-proto': 'https',
+        'x-forwarded-proto': 'https'
       }, done);
   });
 
@@ -434,7 +434,7 @@ describe('server on https', function() {
       .expectJSON({
         host: 'example.com:1337',
         'x-forwarded-port': String(cors_anywhere_port),
-        'x-forwarded-proto': 'https',
+        'x-forwarded-proto': 'https'
       }, done);
   });
 });
@@ -442,7 +442,7 @@ describe('server on https', function() {
 describe('originBlacklist', function() {
   before(function() {
     cors_anywhere = createServer({
-      originBlacklist: ['http://denied.origin.test'],
+      originBlacklist: ['http://denied.origin.test']
     });
     cors_anywhere_port = cors_anywhere.listen(0).address().port;
   });
@@ -475,7 +475,7 @@ describe('originBlacklist', function() {
 describe('originWhitelist', function() {
   before(function() {
     cors_anywhere = createServer({
-      originWhitelist: ['https://permitted.origin.test'],
+      originWhitelist: ['https://permitted.origin.test']
     });
     cors_anywhere_port = cors_anywhere.listen(0).address().port;
   });
@@ -510,7 +510,7 @@ describe('checkRateLimit', function() {
 
   it('GET /example.com without rate-limit', function(done) {
     cors_anywhere = createServer({
-      checkRateLimit: function() {},
+      checkRateLimit: function() {}
     });
     cors_anywhere_port = cors_anywhere.listen(0).address().port;
     request(cors_anywhere)
@@ -525,7 +525,7 @@ describe('checkRateLimit', function() {
         // Non-empty value. Let's return the origin parameter so that we also verify that the
         // the parameter is really the origin.
         return '[' + origin + ']';
-      },
+      }
     });
     cors_anywhere_port = cors_anywhere.listen(0).address().port;
     request(cors_anywhere)
@@ -540,7 +540,7 @@ describe('checkRateLimit', function() {
 describe('redirectSameOrigin', function() {
   before(function() {
     cors_anywhere = createServer({
-      redirectSameOrigin: true,
+      redirectSameOrigin: true
     });
     cors_anywhere_port = cors_anywhere.listen(0).address().port;
   });
@@ -615,7 +615,7 @@ describe('redirectSameOrigin', function() {
 describe('requireHeader', function() {
   before(function() {
     cors_anywhere = createServer({
-      requireHeader: ['origin', 'x-requested-with'],
+      requireHeader: ['origin', 'x-requested-with']
     });
     cors_anywhere_port = cors_anywhere.listen(0).address().port;
   });
@@ -647,7 +647,7 @@ describe('requireHeader', function() {
   it('GET /example.com without header (requireHeader as string)', function(done) {
     stopServer(function() {
       cors_anywhere = createServer({
-        requireHeader: 'origin',
+        requireHeader: 'origin'
       });
       cors_anywhere_port = cors_anywhere.listen(0).address().port;
       request(cors_anywhere)
@@ -660,7 +660,7 @@ describe('requireHeader', function() {
   it('GET /example.com with header (requireHeader as string)', function(done) {
     stopServer(function() {
       cors_anywhere = createServer({
-        requireHeader: 'origin',
+        requireHeader: 'origin'
       });
       cors_anywhere_port = cors_anywhere.listen(0).address().port;
       request(cors_anywhere)
@@ -674,7 +674,7 @@ describe('requireHeader', function() {
   it('GET /example.com without header (requireHeader as string, uppercase)', function(done) {
     stopServer(function() {
       cors_anywhere = createServer({
-        requireHeader: 'ORIGIN',
+        requireHeader: 'ORIGIN'
       });
       cors_anywhere_port = cors_anywhere.listen(0).address().port;
       request(cors_anywhere)
@@ -687,7 +687,7 @@ describe('requireHeader', function() {
   it('GET /example.com with header (requireHeader as string, uppercase)', function(done) {
     stopServer(function() {
       cors_anywhere = createServer({
-        requireHeader: 'ORIGIN',
+        requireHeader: 'ORIGIN'
       });
       cors_anywhere_port = cors_anywhere.listen(0).address().port;
       request(cors_anywhere)
@@ -701,7 +701,7 @@ describe('requireHeader', function() {
   it('GET /example.com (requireHeader is an empty array)', function(done) {
     stopServer(function() {
       cors_anywhere = createServer({
-        requireHeader: [],
+        requireHeader: []
       });
       cors_anywhere_port = cors_anywhere.listen(0).address().port;
       request(cors_anywhere)
@@ -715,7 +715,7 @@ describe('requireHeader', function() {
 describe('removeHeaders', function() {
   before(function() {
     cors_anywhere = createServer({
-      removeHeaders: ['cookie', 'cookie2'],
+      removeHeaders: ['cookie', 'cookie2']
     });
     cors_anywhere_port = cors_anywhere.listen(0).address().port;
   });
@@ -728,7 +728,7 @@ describe('removeHeaders', function() {
       .set('cookie2', 'b')
       .expect('Access-Control-Allow-Origin', '*')
       .expectJSON({
-        host: 'example.com',
+        host: 'example.com'
       }, done);
   });
 
@@ -741,7 +741,7 @@ describe('removeHeaders', function() {
       .expect('Access-Control-Allow-Origin', '*')
       .expectJSON({
         host: 'example.com',
-        cookie3: 'c',
+        cookie3: 'c'
       }, done);
   });
 });
@@ -749,7 +749,7 @@ describe('removeHeaders', function() {
 describe('setHeaders', function() {
   before(function() {
     cors_anywhere = createServer({
-      setHeaders: {'x-powered-by': 'CORS Anywhere'},
+      setHeaders: {'x-powered-by': 'CORS Anywhere'}
     });
     cors_anywhere_port = cors_anywhere.listen(0).address().port;
   });
@@ -761,7 +761,7 @@ describe('setHeaders', function() {
       .expect('Access-Control-Allow-Origin', '*')
       .expectJSON({
         host: 'example.com',
-        'x-powered-by': 'CORS Anywhere',
+        'x-powered-by': 'CORS Anywhere'
       }, done);
   });
 
@@ -772,7 +772,7 @@ describe('setHeaders', function() {
       .expect('Access-Control-Allow-Origin', '*')
       .expectJSON({
         host: 'example.com',
-        'x-powered-by': 'CORS Anywhere',
+        'x-powered-by': 'CORS Anywhere'
       }, done);
   });
 });
@@ -782,7 +782,7 @@ describe('setHeaders + removeHeaders', function() {
     // setHeaders takes precedence over removeHeaders
     cors_anywhere = createServer({
       removeHeaders: ['x-powered-by'],
-      setHeaders: {'x-powered-by': 'CORS Anywhere'},
+      setHeaders: {'x-powered-by': 'CORS Anywhere'}
     });
     cors_anywhere_port = cors_anywhere.listen(0).address().port;
   });
@@ -794,7 +794,7 @@ describe('setHeaders + removeHeaders', function() {
       .expect('Access-Control-Allow-Origin', '*')
       .expectJSON({
         host: 'example.com',
-        'x-powered-by': 'CORS Anywhere',
+        'x-powered-by': 'CORS Anywhere'
       }, done);
   });
 
@@ -805,7 +805,7 @@ describe('setHeaders + removeHeaders', function() {
       .expect('Access-Control-Allow-Origin', '*')
       .expectJSON({
         host: 'example.com',
-        'x-powered-by': 'CORS Anywhere',
+        'x-powered-by': 'CORS Anywhere'
       }, done);
   });
 });
@@ -814,8 +814,8 @@ describe('httpProxyOptions.xfwd=false', function() {
   before(function() {
     cors_anywhere = createServer({
       httpProxyOptions: {
-        xfwd: false,
-      },
+        xfwd: false
+      }
     });
     cors_anywhere_port = cors_anywhere.listen(0).address().port;
   });
@@ -827,14 +827,14 @@ describe('httpProxyOptions.xfwd=false', function() {
       .set('test-include-xfwd', '')
       .expect('Access-Control-Allow-Origin', '*')
       .expectJSON({
-        host: 'example.com',
+        host: 'example.com'
       }, done);
   });
 });
 
 describe('httpProxyOptions.getProxyForUrl', function() {
-  var proxy_server;
-  var proxy_url;
+  let proxy_server;
+  let proxy_url;
   before(function() {
     // Using a real server instead of a mock because Nock doesn't can't mock proxies.
     proxy_server = http.createServer(function(req, res) {
@@ -844,8 +844,8 @@ describe('httpProxyOptions.getProxyForUrl', function() {
 
     cors_anywhere = createServer({
       httpProxyOptions: {
-        xfwd: false,
-      },
+        xfwd: false
+      }
     });
     cors_anywhere_port = cors_anywhere.listen(0).address().port;
   });
@@ -911,11 +911,11 @@ describe('helpFile', function() {
   afterEach(stopServer);
 
   it('GET / with custom text helpFile', function(done) {
-    var customHelpTextPath = path.join(__dirname, './customHelp.txt');
-    var customHelpText = fs.readFileSync(customHelpTextPath, {encoding: 'utf8'});
+    let customHelpTextPath = path.join(__dirname, './customHelp.txt');
+    let customHelpText = fs.readFileSync(customHelpTextPath, {encoding: 'utf8'});
 
     cors_anywhere = createServer({
-      helpFile: customHelpTextPath,
+      helpFile: customHelpTextPath
     });
     cors_anywhere_port = cors_anywhere.listen(0).address().port;
 
@@ -927,11 +927,11 @@ describe('helpFile', function() {
   });
 
   it('GET / with custom HTML helpFile', function(done) {
-    var customHelpTextPath = path.join(__dirname, './customHelp.html');
-    var customHelpText = fs.readFileSync(customHelpTextPath, {encoding: 'utf8'});
+    let customHelpTextPath = path.join(__dirname, './customHelp.html');
+    let customHelpText = fs.readFileSync(customHelpTextPath, {encoding: 'utf8'});
 
     cors_anywhere = createServer({
-      helpFile: customHelpTextPath,
+      helpFile: customHelpTextPath
     });
     cors_anywhere_port = cors_anywhere.listen(0).address().port;
 
@@ -943,10 +943,10 @@ describe('helpFile', function() {
   });
 
   it('GET / with non-existent help file', function(done) {
-    var customHelpTextPath = path.join(__dirname, 'Some non-existing file.');
+    let customHelpTextPath = path.join(__dirname, 'Some non-existing file.');
 
     cors_anywhere = createServer({
-      helpFile: customHelpTextPath,
+      helpFile: customHelpTextPath
     });
     cors_anywhere_port = cors_anywhere.listen(0).address().port;
 

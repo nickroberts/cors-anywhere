@@ -1,13 +1,15 @@
 // Heroku defines the environment variable PORT, and requires the binding address to be 0.0.0.0
-var host = process.env.PORT ? '0.0.0.0' : '127.0.0.1';
-var port = process.env.PORT || 8080;
+const host = process.env.PORT ? '0.0.0.0' : '127.0.0.1';
+const port = process.env.PORT || 8080;
+const winston = require('winston');
+winston.level = process.env.LOG_LEVEL || 'info';
 
 // Grab the blacklist from the command-line so that we can update the blacklist without deploying
 // again. CORS Anywhere is open by design, and this blacklist is not used, except for countering
 // immediate abuse (e.g. denial of service). If you want to block all origins except for some,
 // use originWhitelist instead.
-var originBlacklist = parseEnvList(process.env.CORSANYWHERE_BLACKLIST);
-var originWhitelist = parseEnvList(process.env.CORSANYWHERE_WHITELIST);
+const originBlacklist = parseEnvList(process.env.CORSANYWHERE_BLACKLIST);
+const originWhitelist = parseEnvList(process.env.CORSANYWHERE_WHITELIST);
 function parseEnvList(env) {
   if (!env) {
     return [];
@@ -16,9 +18,9 @@ function parseEnvList(env) {
 }
 
 // Set up rate-limiting to avoid abuse of the public CORS Anywhere server.
-var checkRateLimit = require('./lib/rate-limit')(process.env.CORSANYWHERE_RATELIMIT);
+const checkRateLimit = require('./lib/rate-limit')(process.env.CORSANYWHERE_RATELIMIT);
 
-var cors_proxy = require('./lib/cors-anywhere');
+const cors_proxy = require('./lib/cors-anywhere');
 cors_proxy.createServer({
   originBlacklist: originBlacklist,
   originWhitelist: originWhitelist,
@@ -31,13 +33,13 @@ cors_proxy.createServer({
     'x-heroku-queue-wait-time',
     'x-heroku-queue-depth',
     'x-heroku-dynos-in-use',
-    'x-request-start',
+    'x-request-start'
   ],
   redirectSameOrigin: true,
   httpProxyOptions: {
     // Do not add X-Forwarded-For, etc. headers, because Heroku already adds it.
-    xfwd: false,
-  },
+    xfwd: false
+  }
 }).listen(port, host, function() {
-  console.log('Running CORS Anywhere on ' + host + ':' + port);
+  winston.info('Running CORS Anywhere on ' + host + ':' + port);
 });

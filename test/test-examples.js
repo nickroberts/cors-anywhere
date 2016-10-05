@@ -11,11 +11,11 @@
 /* eslint-env mocha */
 require('./setup');
 
-var createServer = require('../').createServer;
-var assert = require('assert');
-var request = require('supertest');
+const createServer = require('../').createServer;
+const assert = require('assert');
+const request = require('supertest');
 
-var http = require('http');
+const http = require('http');
 
 describe('Examples', function() {
   // Note: In the examples below we don't listen on any port after calling
@@ -30,9 +30,9 @@ describe('Examples', function() {
   // the examples don't have an explicit .listen() call.
 
   it('Rewrite proxy URL', function(done) {
-    var cors_anywhere = createServer();
+    let cors_anywhere = createServer();
 
-    var http_server = http.createServer(function(req, res) {
+    let http_server = http.createServer(function(req, res) {
       // For testing, check whether req.url is the same as what we input below.
       assert.strictEqual(req.url, '/dummy-for-testing');
 
@@ -50,10 +50,10 @@ describe('Examples', function() {
   });
 
   it('Transform response to uppercase (streaming)', function(done) {
-    var cors_anywhere = createServer();
+    let cors_anywhere = createServer();
 
-    var http_server = http.createServer(function(req, res) {
-      var originalWrite = res.write;
+    let http_server = http.createServer(function(req, res) {
+      let originalWrite = res.write;
 
       res.write = function(data, encoding, callback) {
         if (Buffer.isBuffer(data)) {
@@ -79,13 +79,13 @@ describe('Examples', function() {
   });
 
   it('Transform response to uppercase (buffered)', function(done) {
-    var cors_anywhere = createServer();
+    let cors_anywhere = createServer();
 
-    var http_server = http.createServer(function(req, res) {
-      var originalWrite = res.write;
-      var originalEnd = res.end;
+    let http_server = http.createServer(function(req, res) {
+      let originalWrite = res.write;
+      let originalEnd = res.end;
 
-      var buffers = [];
+      let buffers = [];
 
       res.write = function(data, encoding, callback) {
         assert.ok(Buffer.isBuffer(data) || typeof data === 'string');

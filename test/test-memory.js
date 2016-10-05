@@ -1,16 +1,18 @@
 /* eslint-env mocha */
 // Run this specific test using:
 // npm test -- -f memory
-var http = require('http');
-var path = require('path');
-var url = require('url');
-var fork = require('child_process').fork;
+const http = require('http');
+const path = require('path');
+const url = require('url');
+const fork = require('child_process').fork;
+const winston = require('winston');
+winston.level = process.env.LOG_LEVEL || 'info';
 
 describe('memory usage', function() {
-  var cors_api_url;
+  let cors_api_url;
 
-  var server;
-  var cors_anywhere_child;
+  let server;
+  let cors_anywhere_child;
   before(function(done) {
     server = http.createServer(function(req, res) {
       res.writeHead(200);
@@ -27,13 +29,13 @@ describe('memory usage', function() {
   });
 
   beforeEach(function(done) {
-    var cors_module_path = path.join(__dirname, 'child');
-    var args = [];
+    let cors_module_path = path.join(__dirname, 'child');
+    let args = [];
     // Uncomment this if you want to compare the performance of CORS Anywhere
     // with the standard no-op http module.
     // args.push('use-http-instead-of-cors-anywhere');
     cors_anywhere_child = fork(cors_module_path, args, {
-      execArgv: ['--expose-gc'],
+      execArgv: ['--expose-gc']
     });
     cors_anywhere_child.once('message', function(cors_url) {
       cors_api_url = cors_url;
@@ -55,17 +57,17 @@ describe('memory usage', function() {
    *   Upon failure, called with the error as parameter.
    */
   function performNRequests(n, requestSize, memMax, done) {
-    var remaining = n;
-    var request = url.parse(
+    let remaining = n;
+    let request = url.parse(
         cors_api_url + 'http://127.0.0.1:' + server.address().port);
     request.agent = false; // Force Connection: Close
     request.headers = {
-      'Long-header': new Array(requestSize * 1e3).join('x'),
+      'Long-header': new Array(requestSize * 1e3).join('x')
     };
     (function requestAgain() {
       if (remaining-- === 0) {
         cors_anywhere_child.once('message', function(memory_usage_delta) {
-          console.log('Memory usage delta: ' + memory_usage_delta +
+          winston.info('Memory usage delta: ' + memory_usage_delta +
               ' (' + n + ' requests of ' + requestSize + ' kb each)');
           if (memory_usage_delta > memMax * 1e3) {
             // Note: Even if this error is reached, always profile (e.g. using
@@ -95,7 +97,7 @@ describe('memory usage', function() {
     // This test is just for comparison with the following tests.
     // On Node 0.10.x, the initial memory usage seems higher on Travis, so use
     // a higher maximum value to avoid flaky tests.
-    var memMax = /^v0\./.test(process.version) ? 1200 : 550;
+    let memMax = /^v0\./.test(process.version) ? 1200 : 550;
     performNRequests(100, 50, memMax, done);
   });
 

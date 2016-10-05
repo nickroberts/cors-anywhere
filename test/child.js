@@ -7,10 +7,12 @@
 // The difference in heap space is finally sent back to the parent process.
 // ...
 // The parent process should then kill this child.
+const winston = require('winston');
+winston.level = process.env.LOG_LEVEL || 'info';
 
 process.on('uncaughtException', function(e) {
-  console.error('Uncaught exception in child process: ' + e);
-  console.error(e.stack);
+  winston.error('Uncaught exception in child process: ' + e);
+  winston.error(e.stack);
   process.exit(-1);
 });
 
@@ -19,18 +21,18 @@ process.on('uncaughtException', function(e) {
 // the memory usage measurement later on.
 process.memoryUsage();
 
-var heapUsedStart = 0;
+let heapUsedStart = 0;
 function getMemoryUsage(callback) {
   // Note: Requires --expose-gc
   // 6 is the minimum amount of gc() calls before calling gc() again does not
   // reduce memory any more.
-  for (var i = 0; i < 6; ++i) {
+  for (let i = 0; i < 6; ++i) {
     global.gc();
   }
   callback(process.memoryUsage().heapUsed);
 }
 
-var server;
+let server;
 if (process.argv.indexOf('use-http-instead-of-cors-anywhere') >= 0) {
   server = require('http').createServer(function(req, res) { res.end(); });
 } else {
@@ -43,7 +45,7 @@ server.listen(0, function() {
     hostname: '127.0.0.1',
     port: server.address().port,
     path: '/http://invalid:99999',
-    agent: false,
+    agent: false
   }, function() {
     notifyParent();
   });
@@ -58,7 +60,7 @@ server.listen(0, function() {
 
 process.once('message', function() {
   getMemoryUsage(function(heapUsedEnd) {
-    var delta = heapUsedEnd - heapUsedStart;
+    let delta = heapUsedEnd - heapUsedStart;
     process.send(delta);
   });
 });

@@ -1,9 +1,9 @@
 /* eslint-env mocha */
 
-var createRateLimitChecker = require('../lib/rate-limit');
+const createRateLimitChecker = require('../lib/rate-limit');
 
-var lolex = require('lolex');
-var assert = require('assert');
+const lolex = require('lolex');
+const assert = require('assert');
 
 function assertNotLimited(rateLimitReturnValue) {
   if (rateLimitReturnValue) {
@@ -12,7 +12,7 @@ function assertNotLimited(rateLimitReturnValue) {
 }
 
 function assertLimited(rateLimitReturnValue, limit, period) {
-  var msg;
+  let msg;
   if (period === 1) {
     msg = 'The number of requests is limited to ' + limit + ' per minute. ';
   } else {
@@ -24,7 +24,7 @@ function assertLimited(rateLimitReturnValue, limit, period) {
 }
 
 describe('Rate limit', function() {
-  var clock;
+  let clock;
   beforeEach(function() {
     clock = lolex.install();
   });
@@ -32,7 +32,7 @@ describe('Rate limit', function() {
     clock.uninstall();
   });
   it('is unlimited by default', function() {
-    var checkRateLimit = createRateLimitChecker();
+    let checkRateLimit = createRateLimitChecker();
     assertNotLimited(checkRateLimit('http://example.com'));
     assertNotLimited(checkRateLimit('https://example.com'));
     assertNotLimited(checkRateLimit('https://example.com:1234'));
@@ -45,7 +45,7 @@ describe('Rate limit', function() {
   });
 
   it('zero per minute / 5 minutes', function() {
-    var checkRateLimit = createRateLimitChecker('0 1');
+    let checkRateLimit = createRateLimitChecker('0 1');
     assertLimited(checkRateLimit('http://example.com'), 0, 1);
     assertLimited(checkRateLimit('https://example.com'), 0, 1);
 
@@ -55,7 +55,7 @@ describe('Rate limit', function() {
   });
 
   it('one per minute', function() {
-    var checkRateLimit = createRateLimitChecker('1 1');
+    let checkRateLimit = createRateLimitChecker('1 1');
     assertNotLimited(checkRateLimit('http://example.com'));
     assertLimited(checkRateLimit('http://example.com'), 1, 1);
     assertNotLimited(checkRateLimit('http://example.com:1234'));
@@ -72,7 +72,7 @@ describe('Rate limit', function() {
   });
 
   it('different domains, one per minute', function() {
-    var checkRateLimit = createRateLimitChecker('1 1');
+    let checkRateLimit = createRateLimitChecker('1 1');
     assertNotLimited(checkRateLimit('http://example.com'));
     assertNotLimited(checkRateLimit('http://example.net'));
     assertNotLimited(checkRateLimit('http://wexample.net'));
@@ -93,7 +93,7 @@ describe('Rate limit', function() {
   });
 
   it('unlimited domains, string', function() {
-    var checkRateLimit = createRateLimitChecker('1 2 example.com');
+    let checkRateLimit = createRateLimitChecker('1 2 example.com');
     assertNotLimited(checkRateLimit('http://example.com'));
     assertNotLimited(checkRateLimit('http://example.com'));
 
@@ -106,7 +106,7 @@ describe('Rate limit', function() {
   });
 
   it('unlimited domains, RegExp', function() {
-    var checkRateLimit = createRateLimitChecker('1 2 /example\\.com/');
+    let checkRateLimit = createRateLimitChecker('1 2 /example\\.com/');
     assertNotLimited(checkRateLimit('http://example.com'));
     assertNotLimited(checkRateLimit('http://example.com'));
 
@@ -119,7 +119,7 @@ describe('Rate limit', function() {
   });
 
   it('multiple domains, string', function() {
-    var checkRateLimit = createRateLimitChecker('1 2 a b  cc ');
+    let checkRateLimit = createRateLimitChecker('1 2 a b  cc ');
     assertNotLimited(checkRateLimit('http://a'));
     assertNotLimited(checkRateLimit('http://a'));
     assertNotLimited(checkRateLimit('http://b'));
@@ -131,7 +131,7 @@ describe('Rate limit', function() {
   });
 
   it('multiple domains, RegExp', function() {
-    var checkRateLimit = createRateLimitChecker('1 2 /a/ /b/  /cc/ ');
+    let checkRateLimit = createRateLimitChecker('1 2 /a/ /b/  /cc/ ');
     assertNotLimited(checkRateLimit('http://a'));
     assertNotLimited(checkRateLimit('http://a'));
     assertNotLimited(checkRateLimit('http://b'));
@@ -143,7 +143,7 @@ describe('Rate limit', function() {
   });
 
   it('multiple domains, string and RegExp', function() {
-    var checkRateLimit = createRateLimitChecker('1 2 a /b/');
+    let checkRateLimit = createRateLimitChecker('1 2 a /b/');
     assertNotLimited(checkRateLimit('http://a'));
     assertNotLimited(checkRateLimit('http://a'));
     assertNotLimited(checkRateLimit('http://b'));
@@ -153,7 +153,7 @@ describe('Rate limit', function() {
   });
 
   it('multiple domains, RegExp and string', function() {
-    var checkRateLimit = createRateLimitChecker('1 2 /a/ b');
+    let checkRateLimit = createRateLimitChecker('1 2 /a/ b');
     assertNotLimited(checkRateLimit('http://a'));
     assertNotLimited(checkRateLimit('http://a'));
     assertNotLimited(checkRateLimit('http://b'));
@@ -163,7 +163,7 @@ describe('Rate limit', function() {
   });
 
   it('wildcard subdomains', function() {
-    var checkRateLimit = createRateLimitChecker('0 1 /(.*\\.)?example\\.com/');
+    let checkRateLimit = createRateLimitChecker('0 1 /(.*\\.)?example\\.com/');
     assertNotLimited(checkRateLimit('http://example.com'));
     assertNotLimited(checkRateLimit('http://www.example.com'));
     assertLimited(checkRateLimit('http://xexample.com'), 0, 1);
@@ -171,13 +171,13 @@ describe('Rate limit', function() {
   });
 
   it('wildcard ports', function() {
-    var checkRateLimit = createRateLimitChecker('0 1 /example\\.com(:\\d{1,5})?/');
+    let checkRateLimit = createRateLimitChecker('0 1 /example\\.com(:\\d{1,5})?/');
     assertNotLimited(checkRateLimit('http://example.com'));
     assertNotLimited(checkRateLimit('http://example.com:1234'));
   });
 
   it('empty host', function() {
-    var checkRateLimit = createRateLimitChecker('0 1');
+    let checkRateLimit = createRateLimitChecker('0 1');
     assertLimited(checkRateLimit(''), 0, 1);
     // Empty host actually means empty origin. But let's also test for 'http://'.
     assertLimited(checkRateLimit('http://'), 0, 1);
@@ -192,7 +192,7 @@ describe('Rate limit', function() {
   });
 
   it('null origin', function() {
-    var checkRateLimit = createRateLimitChecker('0 1');
+    let checkRateLimit = createRateLimitChecker('0 1');
     assertLimited(checkRateLimit('null'), 0, 1);
     assertLimited(checkRateLimit('http://null'), 0, 1);
 
@@ -206,7 +206,7 @@ describe('Rate limit', function() {
   });
 
   it('case-insensitive', function() {
-    var checkRateLimit = createRateLimitChecker('0 1 NULL');
+    let checkRateLimit = createRateLimitChecker('0 1 NULL');
     assertNotLimited(checkRateLimit('null'));
     assertNotLimited(checkRateLimit('http://null'));
 

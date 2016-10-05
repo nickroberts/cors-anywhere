@@ -1,4 +1,4 @@
-var nock = require('nock');
+const nock = require('nock');
 
 nock.enableNetConnect('127.0.0.1');
 
@@ -7,20 +7,20 @@ function echoheaders(origin) {
     .persist()
     .get('/echoheaders')
     .reply(function() {
-      var headers = this.req.headers;
-      var excluded_headers = [
+      let headers = this.req.headers;
+      let excluded_headers = [
         'accept-encoding',
         'user-agent',
         'connection',
         // Remove this header since its value is platform-specific.
         'x-forwarded-for',
-        'test-include-xfwd',
+        'test-include-xfwd'
       ];
       if (!('test-include-xfwd' in headers)) {
         excluded_headers.push('x-forwarded-port');
         excluded_headers.push('x-forwarded-proto');
       }
-      var response = {};
+      let response = {};
       Object.keys(headers).forEach(function(name) {
         if (excluded_headers.indexOf(name) === -1) {
           response[name] = headers[name];
@@ -44,23 +44,23 @@ nock('http://example.com')
   .reply(200, '', {
     'Set-Cookie': 'x',
     'Set-Cookie2': 'y',
-    'Set-Cookie3': 'z', // This is not a special cookie setting header.
+    'Set-Cookie3': 'z' // This is not a special cookie setting header.
   })
 
   .get('/redirecttarget')
   .reply(200, 'redirect target', {
-    'Some-header': 'value',
+    'Some-header': 'value'
   })
 
   .head('/redirect')
   .reply(302, '', {
-    Location: '/redirecttarget',
+    Location: '/redirecttarget'
   })
 
   .get('/redirect')
   .reply(302, 'redirecting...', {
     'header at redirect': 'should not be here',
-    Location: '/redirecttarget',
+    Location: '/redirecttarget'
   })
 
   .get('/redirectposttarget')
@@ -71,22 +71,22 @@ nock('http://example.com')
 
   .post('/redirectpost')
   .reply(302, 'redirecting...', {
-    Location: '/redirectposttarget',
+    Location: '/redirectposttarget'
   })
 
   .post('/redirect307')
   .reply(307, 'redirecting...', {
-    Location: '/redirectposttarget',
+    Location: '/redirectposttarget'
   })
 
   .get('/redirect2redirect')
   .reply(302, 'redirecting to redirect...', {
-    Location: '/redirect',
+    Location: '/redirect'
   })
 
   .get('/redirectloop')
   .reply(302, 'redirecting ad infinitum...', {
-    Location: '/redirectloop',
+    Location: '/redirectloop'
   })
 
   .get('/redirectwithoutlocation')
