@@ -1,6 +1,6 @@
 // Heroku defines the environment variable PORT, and requires the binding address to be 0.0.0.0
 const host = process.env.PORT ? '0.0.0.0' : '127.0.0.1';
-const port = process.env.PORT || 8080;
+const port = process.env.PORT || 3000;
 const winston = require('winston');
 const chalk = require('chalk');
 winston.level = process.env.LOG_LEVEL || 'info';
